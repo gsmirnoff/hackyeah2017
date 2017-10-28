@@ -9,7 +9,7 @@
       <b-collapse is-nav id="nav_collapse">
 
         <b-nav is-nav-bar>
-          <b-nav-item href="#">Rules</b-nav-item>
+          <b-nav-item href="/rules">Rules</b-nav-item>
           <b-nav-item href="#">Notifications</b-nav-item>
         </b-nav>
 
