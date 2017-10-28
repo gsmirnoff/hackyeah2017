@@ -52,4 +52,13 @@ public class Auction {
 		return this;
 	}
 
+	public Auction withPhones(List<String> phones) {
+		phones.addAll(phones);
+		return this;
+	}
+
+	@Override
+	public String toString() {
+		return "Auction{" + "nickname='" + nickname + '\'' + ", nIP='" + nIP + '\'' + ", email='" + email + '\'' + ", phones=" + phones + '}';
+	}
 }

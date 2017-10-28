@@ -32,12 +32,13 @@ public class AllegroCrawlerTest {
 	@Test
 	public void testCrawler() throws Exception {
 		// given
-		final int auctionsAmount = 50;
+		final int auctionsAmount = 30;
 
 		// when
 		List<Auction> auctions = crawler.fetch(auctionsAmount);
 
 		// then
+		System.out.println(auctions);
 		//
 	}
 }
