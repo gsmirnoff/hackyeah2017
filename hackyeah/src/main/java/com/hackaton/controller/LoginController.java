@@ -8,11 +8,11 @@ import javax.websocket.server.PathParam;
 
 @RestController
 @RequestMapping("/")
-public class ListOrders {
+public class LoginController {
 
-    @RequestMapping(value = "/test", method = RequestMethod.GET)
-    public String test(@PathParam(value = "number") Integer number) {
-        return "Result is = " + number * 2;
+    @RequestMapping(value = "/login", method = RequestMethod.GET)
+    public String consumeToken(@PathParam(value = "code") String code) {
+        return "Our app received Allegro code=" + code;
     }
 
 }
