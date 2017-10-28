@@ -15,6 +15,13 @@ import Title from './Title.vue';
 import Techs from './techs/Techs.vue';
 import Footer from './Footer.vue';
 
+import Vue from 'vue'
+import BootstrapVue from 'bootstrap-vue'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
+import 'bootstrap/dist/css/bootstrap.css'
+
+Vue.use(BootstrapVue);
+
 export default {
   name: 'Main',
   components: {
