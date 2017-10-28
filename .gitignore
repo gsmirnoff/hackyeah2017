@@ -59,7 +59,6 @@ fabric.properties
 hs_err_pid*
 
 */node_modules/
-*dist*
 .idea/
 .tmp/
 *.iml
