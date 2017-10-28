@@ -1,13 +1,12 @@
 package com.hellyeah.export;
 
-import com.hellyeah.allegro.AllegroCrawler;
-import org.junit.Before;
-import org.junit.Test;
-
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.hellyeah.model.Auction;
 
 
 public class CSVFormattedWriterTest {
@@ -29,11 +28,11 @@ public class CSVFormattedWriterTest {
 	@Test
 	public void write() throws Exception {
 		// given
-		final List<AllegroCrawler.AllegroAuction> auctions = Arrays.asList(
-				new AllegroCrawler.AllegroAuction().withNickname("smart_fon").withnIP("8992746964").withEmail("smartfon.allegro@gmail.com").withPhone("535468930").withPhone("888599879").withPhone("608092396"),
-				new AllegroCrawler.AllegroAuction().withNickname("KUBTEL_S").withEmail("meandmobileallegro@gmail.com").withPhone("509919099").withPhone("530222477"),
-				new AllegroCrawler.AllegroAuction().withNickname("MDM-KOM").withnIP("7272801172").withPhone("502928871"),
-				new AllegroCrawler.AllegroAuction().withNickname("www_PL-GSM_pl").withnIP("727-280-11-72")
+		final List<Auction> auctions = Arrays.asList(
+				new Auction().withNickname("smart_fon").withnIP("8992746964").withEmail("smartfon.allegro@gmail.com").withPhone("535468930").withPhone("888599879").withPhone("608092396"),
+				new Auction().withNickname("KUBTEL_S").withEmail("meandmobileallegro@gmail.com").withPhone("509919099").withPhone("530222477"),
+				new Auction().withNickname("MDM-KOM").withnIP("7272801172").withPhone("502928871"),
+				new Auction().withNickname("www_PL-GSM_pl").withnIP("727-280-11-72")
 		);
 
 		// when

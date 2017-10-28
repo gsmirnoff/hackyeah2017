@@ -1,6 +1,7 @@
 package com.hellyeah.export;
 
 import com.hellyeah.allegro.AllegroCrawler;
+import com.hellyeah.model.Auction;
 
 import java.io.IOException;
 import java.util.List;
@@ -14,7 +15,7 @@ public class CSVFormattedWriter {
 
 	private CSVWriter writer;
 
-	public void writeAll(List<AllegroCrawler.AllegroAuction> auctions) throws IOException {
+	public void writeAll(List<Auction> auctions) throws IOException {
 		List<String> lines = auctions.stream()
 										.map(a -> format(a.getNickname(), a.getnIP(), a.getEmail(), a.getPhones()))
 										.collect(Collectors.toList());

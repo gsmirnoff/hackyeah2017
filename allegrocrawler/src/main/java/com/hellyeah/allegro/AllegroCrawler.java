@@ -1,12 +1,17 @@
 package com.hellyeah.allegro;
 
+import com.hellyeah.DataFetcher;
+import com.hellyeah.DataFetcherException;
 import com.hellyeah.http.HttpClient;
 import com.hellyeah.http.HttpClientException;
+import com.hellyeah.model.Auction;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class AllegroCrawler {
+public class AllegroCrawler implements DataFetcher {
 
 	private static final String BASE_URL = "https://allegro.pl/kategoria/elektronika";
 	private static final String PAGE_PARAM = "p";
@@ -15,57 +20,16 @@ public class AllegroCrawler {
 
 	// https://allegro.pl/kategoria/elektronika?string=vat%20marza&stan=nowe&order=m&bmatch=ss-base-relevance-floki-5-nga-hcp-ele-1-4-1003&p=2
 
-	public static class AllegroAuction {
+	@Override
+	public List<Auction> fetch(int auctionsCount) throws DataFetcherException {
+		List<Auction> auctions = new ArrayList<>(auctionsCount);
 
-		private String url;
-		private String nickname;
-		private String nIP;
-		private String email;
-		private List<String> phones = new ArrayList<>();
-
-		private Map<String, String> parameters;
-
-		public String getNickname() {
-			return nickname;
+		String searchResultsPage;
+		try {
+			searchResultsPage = search();
+		} catch (HttpClientException e) {
+			throw new DataFetcherException("Unable to fetcher auctions from Allegro", e);
 		}
-
-		public String getnIP() {
-			return nIP;
-		}
-
-		public String getEmail() {
-			return email;
-		}
-
-		public List<String> getPhones() {
-			return phones;
-		}
-
-		public AllegroAuction withNickname(String nickname) {
-			this.nickname = nickname;
-			return this;
-		}
-
-		public AllegroAuction withnIP(String nIP) {
-			this.nIP = nIP;
-			return this;
-		}
-
-		public AllegroAuction withEmail(String email) {
-			this.email = email;
-			return this;
-		}
-
-		public AllegroAuction withPhone(String phone) {
-			phones.add(phone);
-			return this;
-		}
-	}
-
-	public List<AllegroAuction> fetchAllegroAuctions(int auctionsCount) {
-		List<AllegroAuction> auctions = new ArrayList<>(auctionsCount);
-
-		String searchResultsPage = search();
 
 		while (auctions.size() <= auctionsCount) {
 			auctions.addAll(retrieveAuctions(searchResultsPage));
@@ -76,16 +40,15 @@ public class AllegroCrawler {
 		return auctions;
 	}
 
-	private String search() {
-//		return httpClient.get();
-		return null;
+	private String search() throws HttpClientException {
+		return httpClient.get(BASE_URL, searchParameters);
 	}
 
 	private String nextSearchPage() {
 		return null;
 	}
 
-	private List<AllegroAuction> retrieveAuctions(String searchPage) {
+	private List<Auction> retrieveAuctions(String searchPage) {
 		return getAuctionUrls(searchPage).stream()
 					.map(this::loadAuctionPage)
 					.filter(Objects::nonNull)
@@ -94,7 +57,38 @@ public class AllegroCrawler {
 	}
 
 	private List<String> getAuctionUrls(String searchPage) {
-		return null;
+		List<String> urls = new ArrayList<>();
+		List<String> articles = findAllArticles(searchPage);
+
+		for (String article : articles) {
+			urls.addAll(fetchUrlsFromArticle(article));
+		}
+
+		return urls;
+	}
+
+	private static final Pattern ARTICLE_PATTERN = Pattern.compile("<article.*>(.+)</article>", Pattern.DOTALL);
+	private static final Pattern ARTICLE_URL_PATTERN = Pattern.compile("<article.*>(.+)</article>", Pattern.DOTALL);
+
+	private List<String> findAllArticles(String searchPage) {
+		Matcher m = ARTICLE_PATTERN.matcher(searchPage);
+
+		List<String> articles = new ArrayList<>();
+		while(m.find()) {
+			articles.add(m.group(1).trim());
+		}
+		return articles;
+	}
+
+	private List<String> fetchUrlsFromArticle(String article) {
+		Matcher m = ARTICLE_URL_PATTERN.matcher(article);
+
+		List<String> urls = new ArrayList<>();
+		while (m.find()) {
+			urls.add(m.group(1));
+		}
+
+		return urls;
 	}
 
 	private String loadAuctionPage(String url) {
@@ -106,7 +100,7 @@ public class AllegroCrawler {
 		}
 	}
 
-	private AllegroAuction parseAuctionPage(String auctionPage) {
+	private Auction parseAuctionPage(String auctionPage) {
 		return null;
 	}
 
