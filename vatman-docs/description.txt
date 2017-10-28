@@ -1,0 +1,11 @@
+What to add in the future?
+    -machine learning
+    -
+Composition - reflected in diagram
+Scalability - can be several instances of almost each part of the system
+Flexibility with respect to different data sources - data sources can be specified in ui, everything goes through common interface
+Application monitoring - extensive logging, which is going to be connected with elk
+Performance - mostly falls in the same bucket as scalability
+Accountability - With amazon taken as service provider, we could adapt number of instances with respect to data load.
+                 Rules engine can be executed in amazon lambdas, which are even cheaper than mormal instances
+Portability - WE ARE IN CLOUD!!! +java
