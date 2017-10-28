@@ -1,6 +1,8 @@
 package com.hackaton.controller;
 
 import org.apache.tomcat.util.codec.binary.Base64;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -12,8 +14,6 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
 import javax.websocket.server.PathParam;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/")
@@ -29,7 +29,7 @@ public class LoginController {
     private RestTemplate restTemplate;
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public String consumeToken(@PathParam(value = "code") String code) {
+    public String consumeToken(@PathParam(value = "code") String code) throws JSONException {
         System.out.println("CODE RECEIVED=" + code);
 
         HttpHeaders headers = buildAuthHeaders();
@@ -38,9 +38,31 @@ public class LoginController {
         ResponseEntity<String> exchange = restTemplate.exchange(TOKEN_URL + "?grant_type=authorization_code&code=" +
                 code + "&api-key=" + API_KEY + "&redirect_uri=" + REDIRECT_URL, HttpMethod.POST, entity, String.class);
 
+        JSONObject response = new JSONObject(exchange.getBody());
+
+        return testRequest((String) response.get("access_token"));
+    }
+
+    private static class Resp {
+        String access_token;
+    }
+
+    //curl -X GET -H "Authorization: Bearer eyJ...dUA" -H
+    // "Api-Key: eyJ...My0" -H "Accept: application/vnd.allegro.public.v1+json" 'https://allegroapi.io/orders?seller.id=24681012&from=2016-01-26T00:00:00'
+
+    private String testRequest(String token) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + token);
+        headers.add("Api-Key", API_KEY);
+        headers.add("Accept", "application/vnd.allegro.public.v1+json");
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        String tmpUrl = "https://allegroapi.io/offers?offset=0&limit=100";
+
+        ResponseEntity<Object> exchange = restTemplate.exchange(tmpUrl, HttpMethod.GET, entity, Object.class);
+
+
         return exchange.toString();
-
-
     }
 
     private HttpHeaders buildAuthHeaders() {
