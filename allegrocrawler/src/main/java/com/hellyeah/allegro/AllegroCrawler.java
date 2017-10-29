@@ -52,7 +52,14 @@ public class AllegroCrawler implements DataFetcher {
 		}
 
 		while (auctions.size() <= auctionsCount) {
-			auctions.addAll(retrieveAuctions(searchResultsPage));
+			List<Auction> result = retrieveAuctions(searchResultsPage);
+
+			if (result.isEmpty()) {
+				LOGGER.info("No auctions found on a page.");
+				break;
+			}
+
+			auctions.addAll(result);
 
 			try {
 				searchResultsPage = nextSearchPage(++ searchPage);
