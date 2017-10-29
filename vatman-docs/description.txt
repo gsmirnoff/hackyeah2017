@@ -1,6 +1,7 @@
 What to add in the future?
     -machine learning (since process requires human to check the results (verify whether it's fraud or not),
      we might use results of their checks as a learning data for our model)
+    -connect other external sources of data (e.g. lookup for nip in government dbs - black lists...)
     -allow user to define a way of data fetching as series of steps
      example: (1) -> make a request GET someportal.com/api/offers/?category=electronics
               (2) -> take specific fields from response - [].offer.price, [].sellerdata.name, [].sellerdata.nip, ...
