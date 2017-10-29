@@ -18,3 +18,6 @@ Accountability:
 Price - With amazon taken as service provider, we could adapt number of instances with respect to data load.
         Rules engine can be executed in amazon lambdas, which are even cheaper than normal instances
 Portability - WE ARE IN CLOUD!!! +java
+
+for current version we've taken the offers with "stan=nowy" from category "electronics", containing also "vat marza" anywhere in the offer.
+then we filtered out the records which are not really in "condition=new" based on black list of most popular marketing tricks :)
