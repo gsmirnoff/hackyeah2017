@@ -13,12 +13,16 @@
         <param name="append" value="false" />
         <param name="maxBackupIndex" value="5" />
         <!-- For Tomcat -->
-        <param name="file" value="${logs.dir}/logs/AllegroCrawler.log" />
+        <param name="file" value="${logs.dir}\logs\AllegroCrawler.log" />
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern"
                    value="%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n" />
         </layout>
     </appender>
+
+    <category name="com.hellyeah">
+        <appender-ref ref="file"/>
+    </category>
 
     <root>
         <priority value ="info" />

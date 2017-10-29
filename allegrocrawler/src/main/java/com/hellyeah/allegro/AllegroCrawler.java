@@ -38,15 +38,15 @@ public class AllegroCrawler implements DataFetcher {
 	private HttpClient httpClient;
 
 	@Override
-	public List<Auction> fetch(int auctionsCount) throws DataFetcherException {
+	public List<Auction> fetch(int auctionsCount, int startPage) throws DataFetcherException {
 		LOGGER.info("Start fetching " + auctionsCount + " auctions from Allegro");
 
 		List<Auction> auctions = new ArrayList<>(auctionsCount);
 
 		String searchResultsPage;
-		int searchPage = 1;
+		int searchPage = startPage != -1 ? startPage : 1;
 		try {
-			searchResultsPage = search(null);
+			searchResultsPage = search(startPage != -1 ? searchPage + "" : null);
 		} catch (HttpClientException e) {
 			throw new DataFetcherException("Unable to fetcher auctions from Allegro", e);
 		}
@@ -55,11 +55,17 @@ public class AllegroCrawler implements DataFetcher {
 			List<Auction> result = retrieveAuctions(searchResultsPage);
 
 			if (result.isEmpty()) {
-				LOGGER.info("No auctions found on a page.");
+				LOGGER.info("No auctions found on a page " + searchPage);
 				break;
 			}
 
 			auctions.addAll(result);
+
+			try {
+				Thread.sleep(2000L);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 
 			try {
 				searchResultsPage = nextSearchPage(++ searchPage);
@@ -68,19 +74,19 @@ public class AllegroCrawler implements DataFetcher {
 			}
 		}
 
-		LOGGER.info("Auctions fetched: " + auctions);
+		LOGGER.info("Auctions fetched " + auctions.size() + " - " + auctions);
 
 		return removeDuplicates(auctions);
 	}
 
 	private String search(String page) throws HttpClientException {
-		LOGGER.info("Search by URL " + BASE_URL);
-
 		Map<String, Object> searchParameters = new HashMap<>();
 		searchParameters.putAll(this.searchParameters);
 
 		if (page != null)
 			searchParameters.put(PAGE_PARAM, page);
+
+		LOGGER.info("Search by URL " + BASE_URL + " with params " + searchParameters);
 
 		return httpClient.get(BASE_URL, searchParameters);
 	}
@@ -217,6 +223,11 @@ public class AllegroCrawler implements DataFetcher {
 		public SearchPageData(String url, String sellerId) {
 			this.url = url;
 			this.sellerId = sellerId;
+		}
+
+		@Override
+		public String toString() {
+			return "SearchPageData{" + "url='" + url + '\'' + ", sellerId='" + sellerId + '\'' + '}';
 		}
 	}
 

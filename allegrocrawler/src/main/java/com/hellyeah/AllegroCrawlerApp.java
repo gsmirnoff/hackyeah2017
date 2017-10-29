@@ -46,7 +46,7 @@ public class AllegroCrawlerApp {
 		writer.setWriter(csvWriter);
 
 		final int auctionCount = 10000;
-		List<Auction> auctionList = crawler.fetch(auctionCount);
+		List<Auction> auctionList = crawler.fetch(auctionCount, -1);
 		writer.writeAll(auctionList);
 	}
 

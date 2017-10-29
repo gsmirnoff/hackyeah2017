@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface DataFetcher {
 
-	List<Auction> fetch(int auctionsCount) throws DataFetcherException;
+	List<Auction> fetch(int auctionsCount, int startPage) throws DataFetcherException;
 
 }
