@@ -48,12 +48,12 @@ public class Auction {
 	}
 
 	public Auction withPhone(String phone) {
-		phones.add(phone);
+		this.phones.add(phone);
 		return this;
 	}
 
 	public Auction withPhones(List<String> phones) {
-		phones.addAll(phones);
+		this.phones.addAll(phones);
 		return this;
 	}
 

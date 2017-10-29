@@ -5,20 +5,24 @@ import com.hellyeah.DataFetcherException;
 import com.hellyeah.http.HttpClient;
 import com.hellyeah.http.HttpClientException;
 import com.hellyeah.model.Auction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+
 public class AllegroCrawler implements DataFetcher {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(AllegroCrawler.class);
 
 	private static final String BASE_URL = "https://allegro.pl/kategoria/elektronika";
 	private static final String PAGE_PARAM = "p";
 
-	private static final Pattern ARTICLE_PATTERN_2 = Pattern.compile("\"name\":\\s*\"[^\"]+\",\\s*\"url\":\\s*\"([^\"]+)\",\\s*\"vendor\":\\s*\"[^\"]+\",\\s*\"location\":\\s*\\{\\s*\"country\":\\s*\"PL\",\\s*\"city\":\\s*\"[^\"]+\"\\s*\\},\\s*\"seller\":\\s*\\{\\s*\"id\":\\s*\"(\\d+)\"", Pattern.DOTALL);
+	private static final Pattern SEARCH_DATA_PATTERN = Pattern.compile("\"name\":\\s*\"[^\"]+\",\\s*\"url\":\\s*\"([^\"]+)\",\\s*\"vendor\":\\s*\"[^\"]+\",\\s*\"location\":\\s*\\{\\s*\"country\":\\s*\"PL\",\\s*\"city\":\\s*\"[^\"]+\"\\s*\\},\\s*\"seller\":\\s*\\{\\s*\"id\":\\s*\"(\\d+)\"", Pattern.DOTALL);
 	private static final Pattern ARTICLE_DESCRIPTION_PATTERN = Pattern.compile("<section class=\"description-block\">(.+)<div class=\"panel-group\" id=\"accordion\">", Pattern.DOTALL);
 
 	private static final Pattern NICK_NAME_PATTERN = Pattern.compile("<span class=\"uname\">([^<]+)</span>");
@@ -35,11 +39,14 @@ public class AllegroCrawler implements DataFetcher {
 
 	@Override
 	public List<Auction> fetch(int auctionsCount) throws DataFetcherException {
+		LOGGER.info("Start fetching " + auctionsCount + " auctions from Allegro");
+
 		List<Auction> auctions = new ArrayList<>(auctionsCount);
 
 		String searchResultsPage;
+		int searchPage = 1;
 		try {
-			searchResultsPage = search();
+			searchResultsPage = search(null);
 		} catch (HttpClientException e) {
 			throw new DataFetcherException("Unable to fetcher auctions from Allegro", e);
 		}
@@ -47,21 +54,37 @@ public class AllegroCrawler implements DataFetcher {
 		while (auctions.size() <= auctionsCount) {
 			auctions.addAll(retrieveAuctions(searchResultsPage));
 
-			searchResultsPage = nextSearchPage();
+			try {
+				searchResultsPage = nextSearchPage(++ searchPage);
+			} catch (HttpClientException e) {
+				throw new DataFetcherException("Unable to fetcher next page " + searchPage + " from Allegro", e);
+			}
 		}
 
-		return auctions;
+		LOGGER.info("Auctions fetched: " + auctions);
+
+		return removeDuplicates(auctions);
 	}
 
-	private String search() throws HttpClientException {
+	private String search(String page) throws HttpClientException {
+		LOGGER.info("Search by URL " + BASE_URL);
+
+		Map<String, Object> searchParameters = new HashMap<>();
+		searchParameters.putAll(this.searchParameters);
+
+		if (page != null)
+			searchParameters.put(PAGE_PARAM, page);
+
 		return httpClient.get(BASE_URL, searchParameters);
 	}
 
-	private String nextSearchPage() {
-		return null;
+	private String nextSearchPage(int nextPage) throws HttpClientException {
+		return search(nextPage + "");
 	}
 
 	private List<Auction> retrieveAuctions(String searchPage) throws DataFetcherException {
+		LOGGER.info("Retrieve auctions from search page.");
+
 		return getSearchPageData(searchPage).stream()
 					.filter(isExpectedAuction())
 					.map(s -> loadPage(prepareSellerUrl(s.sellerId)))
@@ -70,14 +93,16 @@ public class AllegroCrawler implements DataFetcher {
 	}
 
 	private List<SearchPageData> getSearchPageData(String searchPage) throws DataFetcherException {
-		Matcher m = ARTICLE_PATTERN_2.matcher(searchPage);
+		Matcher m = SEARCH_DATA_PATTERN.matcher(searchPage);
 
-		List<SearchPageData> articles = new ArrayList<>();
+		List<SearchPageData> searchDataList = new ArrayList<>();
 		while(m.find()) {
-			articles.add(new SearchPageData(encodeUrl(m.group(1).trim()), m.group(2).trim()));
+			searchDataList.add(new SearchPageData(encodeUrl(m.group(1).trim()), m.group(2).trim()));
 		}
 
-		return articles;
+		LOGGER.info("SearchData found: " + searchDataList);
+
+		return searchDataList;
 	}
 
 	private String encodeUrl(String url) throws DataFetcherException {
@@ -97,6 +122,7 @@ public class AllegroCrawler implements DataFetcher {
 			if (!unexpectedWords.isEmpty()) {
 				for (String expectedWord : unexpectedWords) {
 					if (auctionDescription.contains(expectedWord)) {
+						LOGGER.info("Found exceptional auction, skipping: " + s);
 						return false;
 					}
 				}
@@ -107,6 +133,14 @@ public class AllegroCrawler implements DataFetcher {
 	}
 
 	private String loadPage(String url) {
+//		try {
+//			Thread.sleep(2000L);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+
+		LOGGER.info("Load page " + url);
+
 		try {
 			return httpClient.get(url, Collections.emptyMap());
 		} catch (HttpClientException e) {
@@ -146,7 +180,7 @@ public class AllegroCrawler implements DataFetcher {
 	}
 
 	private String getNIP(String sellerPage) {
-		return getByMatcher(sellerPage, NICK_NAME_PATTERN);
+		return getByMatcher(sellerPage, NIP_PATTERN);
 	}
 
 	private String getEmail(String sellerPage) {
@@ -177,6 +211,21 @@ public class AllegroCrawler implements DataFetcher {
 			this.url = url;
 			this.sellerId = sellerId;
 		}
+	}
+
+	private List<Auction> removeDuplicates(List<Auction> auctionsWithDuplicates) {
+		List<Auction> auctions = new ArrayList<>();
+
+		Set<String> nicknames = new HashSet<>();
+		for (Auction auction : auctionsWithDuplicates) {
+			if (!nicknames.contains(auction.getNickname())) {
+				auctions.add(auction);
+			}
+
+			nicknames.add(auction.getNickname());
+		}
+
+		return auctions;
 	}
 
 	public void setHttpClient(HttpClient httpClient) {
