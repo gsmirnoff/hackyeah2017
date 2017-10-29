@@ -44,6 +44,12 @@ public class CrawlerController {
         return "OK!";
     }
 
+    @RequestMapping(value = "/resetTrigger", method = RequestMethod.GET)
+    public String resetT() throws JSONException, IOException {
+        crawlerTrigger.resetTrigger();
+        return "OK!";
+    }
+
 
     @RequestMapping(value = "/tofile", method = RequestMethod.GET)
     public String toFile() throws JSONException, IOException {

@@ -25,9 +25,15 @@ public class CrawlerTrigger {
         i = newI;
     }
 
+    public void resetTrigger() {
+        crawlerService.resetCrawler();
+    }
+
     @Scheduled(fixedRate = 10000)
     public void reportCurrentTime() throws IOException, DataFetcherException {
-        System.out.println("Trying to run crawler on " + dateFormat.format(new Date()));
-        crawlerService.triggerCrawler(i++);
+        System.out.println("Trying to run crawler " + i + " [" + dateFormat.format(new Date()));
+        if (crawlerService.triggerCrawler(i)) {
+            i++;
+        }
     }
 }

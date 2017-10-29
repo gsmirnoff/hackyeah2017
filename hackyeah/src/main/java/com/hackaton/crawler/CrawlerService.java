@@ -34,9 +34,14 @@ public class CrawlerService {
     private AllegroCrawler crawler = new AllegroCrawler();
     private boolean isRunning = false;
 
-    public void triggerCrawler(int searchPage) throws IOException, DataFetcherException {
+    public void resetCrawler() {
+        isRunning = false;
+    }
+
+    public boolean triggerCrawler(int searchPage) throws IOException, DataFetcherException {
         if (isRunning) {
             System.out.println("Can't start! Crawler is already running!");
+            return false;
         }
         System.out.println("Crawler started for page " + searchPage);
         isRunning = true;
@@ -59,6 +64,7 @@ public class CrawlerService {
 
         isRunning = false;
         System.out.println("Crawler finished.");
+        return true;
     }
 
 }
