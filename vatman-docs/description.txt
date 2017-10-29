@@ -1,11 +1,19 @@
 What to add in the future?
-    -machine learning
-    -
+    -machine learning (since process requires human to check the results (verify whether it's fraud or not),
+     we might use results of their checks as a learning data for our model)
+    -allow user to define a way of data fetching as series of steps
+     example: (1) -> make a request GET someportal.com/api/offers/?category=electronics
+              (2) -> take specific fields from response - [].offer.price, [].sellerdata.name, [].sellerdata.nip, ...
+              (3) -> analyze
+    -adapt application to other kinds of text analysis (e.g. define initial sets of rules)
 Composition - reflected in diagram
 Scalability - can be several instances of almost each part of the system
 Flexibility with respect to different data sources - data sources can be specified in ui, everything goes through common interface
 Application monitoring - extensive logging, which is going to be connected with elk
 Performance - mostly falls in the same bucket as scalability
-Accountability - With amazon taken as service provider, we could adapt number of instances with respect to data load.
-                 Rules engine can be executed in amazon lambdas, which are even cheaper than mormal instances
+Accountability:
+    -since initial set of rules is going to be created by real vat inspectors, it's going to be quite correct
+    -since we're going to attach machine learning, rules are going to be better and better, as the model learns
+Price - With amazon taken as service provider, we could adapt number of instances with respect to data load.
+        Rules engine can be executed in amazon lambdas, which are even cheaper than normal instances
 Portability - WE ARE IN CLOUD!!! +java
