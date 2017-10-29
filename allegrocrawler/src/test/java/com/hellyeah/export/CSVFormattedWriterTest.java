@@ -1,5 +1,8 @@
 package com.hellyeah.export;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -58,7 +61,18 @@ public class CSVFormattedWriterTest {
 		//TODO make mock for CSVWriter and check write() method call
 	}
 
-	private static final Pattern AUCTIONS_PATTERN = Pattern.compile("Auction\\{nickname='([^']+)', nIP='([^']+)', email='([^']+)', phones=\\[([^\\]]+)\\]}");
+	@Test
+	public void name() throws Exception {
+		List<String> lines = Files.readAllLines(Paths.get("c:\\Development\\projects\\hackyeah\\Auctions.txt"));
+		List<Auction> auctions = new ArrayList<>();
+
+		for (String line : lines) {
+			auctions.addAll(prepareAuction(line));
+		}
+		writer.writeAll(auctions);
+	}
+
+	private static final Pattern AUCTIONS_PATTERN = Pattern.compile("Auction\\{nickname='([^']*)', nIP='([^']*)', email='([^']*)', phones=\\[([^\\]]*)\\]}");
 
 	private List<Auction> prepareAuction(String stringAuctions) {
 		List<Auction> auctions = new ArrayList<>();

@@ -35,7 +35,7 @@ public class AllegroCrawlerTest {
 		final int auctionsAmount = 30;
 
 		// when
-		List<Auction> auctions = crawler.fetch(auctionsAmount);
+		List<Auction> auctions = crawler.fetch(auctionsAmount, 0);
 
 		// then
 		System.out.println(auctions);

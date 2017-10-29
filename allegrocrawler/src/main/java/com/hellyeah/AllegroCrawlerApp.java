@@ -1,12 +1,14 @@
 package com.hellyeah;
 
 import com.hellyeah.allegro.AllegroCrawler;
+import com.hellyeah.allegro.SearchDataCrawler;
 import com.hellyeah.export.CSVFormattedWriter;
 import com.hellyeah.export.CSVWriter;
 import com.hellyeah.http.HttpClient;
 import com.hellyeah.http.UnirestHttpClient;
 import com.hellyeah.model.Auction;
 
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +28,8 @@ public class AllegroCrawlerApp {
 
 	public static void main(String... args) throws Exception {
 		AllegroCrawler crawler	= new AllegroCrawler();
+//		SearchDataCrawler crawler = new SearchDataCrawler();
+//		crawler.setPath(Paths.get("c:\\Development\\projects\\hackyeah\\SearchPageData.txt"));
 
 		HttpClient httpClient = new UnirestHttpClient();
 		crawler.setHttpClient(httpClient);
@@ -45,8 +49,8 @@ public class AllegroCrawlerApp {
 		csvWriter.setDirectory("c:\\Development\\projects\\hackyeah\\");
 		writer.setWriter(csvWriter);
 
-		final int auctionCount = 10000;
-		List<Auction> auctionList = crawler.fetch(auctionCount, -1);
+		final int auctionCount = 1800;
+		List<Auction> auctionList = crawler.fetch(auctionCount, 81);
 		writer.writeAll(auctionList);
 	}
 

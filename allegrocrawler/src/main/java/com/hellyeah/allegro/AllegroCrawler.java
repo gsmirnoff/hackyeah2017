@@ -54,6 +54,8 @@ public class AllegroCrawler implements DataFetcher {
 		while (auctions.size() <= auctionsCount) {
 			List<Auction> result = retrieveAuctions(searchResultsPage);
 
+			LOGGER.info("Auctions found: " + result);
+
 			if (result.isEmpty()) {
 				LOGGER.info("No auctions found on a page " + searchPage);
 				break;
@@ -79,7 +81,7 @@ public class AllegroCrawler implements DataFetcher {
 		return removeDuplicates(auctions);
 	}
 
-	private String search(String page) throws HttpClientException {
+	protected String search(String page) throws HttpClientException {
 		Map<String, Object> searchParameters = new HashMap<>();
 		searchParameters.putAll(this.searchParameters);
 
@@ -105,7 +107,7 @@ public class AllegroCrawler implements DataFetcher {
 					.collect(Collectors.toList());
 	}
 
-	private List<SearchPageData> getSearchPageData(String searchPage) throws DataFetcherException {
+	protected List<SearchPageData> getSearchPageData(String searchPage) throws DataFetcherException {
 		Matcher m = SEARCH_DATA_PATTERN.matcher(searchPage);
 
 		List<SearchPageData> searchDataList = new ArrayList<>();
@@ -216,7 +218,7 @@ public class AllegroCrawler implements DataFetcher {
 		return m.find() ? m.group(1) : "";
 	}
 
-	private static class SearchPageData {
+	public static class SearchPageData {
 		private String url;
 		private String sellerId;
 
